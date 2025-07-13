@@ -1,6 +1,0 @@
-driver_id,trip_id,trip_duration_minutes,trip_distance_km,max_speed_kmh,avg_speed_kmh,hard_braking_count,hard_acceleration_count,sharp_turn_count,night_driving_minutes,rush_hour_minutes,weekend_driving,phone_use_minutes,continuous_driving_hours,adverse_weather,rain_driving,high_traffic_ratio
-driver_001,trip_001,45.5,32.1,95.0,65.2,2,1,0,10.0,20.0,0,5.0,0.75,0,0,0.4
-driver_002,trip_002,30.2,18.5,75.0,55.8,0,0,1,0.0,15.0,1,0.0,0.5,0,0,0.2
-driver_003,trip_003,62.1,48.7,125.0,78.9,4,3,2,45.0,0.0,0,8.0,1.0,1,1,0.1
-driver_004,trip_004,15.8,8.2,60.0,45.3,1,0,0,5.0,10.0,1,2.0,0.25,0,0,0.6
-driver_005,trip_005,90.3,75.4,110.0,82.1,3,2,1,30.0,45.0,0,0.0,1.5,0,0,0.3

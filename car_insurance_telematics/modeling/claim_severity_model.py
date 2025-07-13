@@ -3,15 +3,16 @@ Claim Severity Model
 Regression model to predict claim amounts given that a claim occurs
 """
 
-import pandas as pd
-import numpy as np
-from typing import Dict, Any, Tuple, Optional
-import xgboost as xgb
-from sklearn.model_selection import cross_val_score, KFold
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-import joblib
 import logging
+from typing import Any, Dict, Optional, Tuple
+
+import joblib
+import numpy as np
+import pandas as pd
+import xgboost as xgb
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.preprocessing import StandardScaler
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,25 +39,42 @@ class ClaimSeverityModel:
         """Create the base model"""
         if self.model_type == "xgboost":
             params = {
-                'n_estimators': 100,
-                'max_depth': 6,
-                'learning_rate': 0.1,
-                'objective': 'reg:squarederror',
-                'random_state': 42,
-                'tree_method': 'hist'
+                "n_estimators": 200,
+                "max_depth": 6,
+                "learning_rate": 0.05,
+                "objective": "reg:squarederror",
+                "random_state": 42,
+                "tree_method": "hist",
+                "eval_metric": "rmse",
             }
+            # params = {
+            #     'n_estimators': 200,
+            #     'max_depth': 5,
+            #     'learning_rate': 0.05,
+            #     'objective': 'reg:squarederror',
+            #     'random_state': 42,
+            #     'tree_method': 'hist',
+            #     'subsample': 0.8,
+            #     'colsample_bytree': 0.8,
+            #     'min_child_weight': 3,
+            #     'gamma': 0.05,
+            #     'reg_alpha': 0.1,
+            #     'reg_lambda': 1.0,
+            #     'eval_metric': 'rmse'
+            # }
 
             # Add early_stopping_rounds to constructor if provided
             if early_stopping_rounds is not None:
-                params['early_stopping_rounds'] = early_stopping_rounds
-                params['n_estimators'] = 1000  # Set higher when using early stopping
+                params["early_stopping_rounds"] = early_stopping_rounds
+                params["n_estimators"] = 1000  # Set higher when using early stopping
 
             return xgb.XGBRegressor(**params)
         else:
             raise ValueError(f"Unknown model type: {self.model_type}")
 
-    def train(self, X: pd.DataFrame, y: pd.Series,
-              validation_data: Optional[Tuple[pd.DataFrame, pd.Series]] = None) -> Dict[str, Any]:
+    def train(
+        self, X: pd.DataFrame, y: pd.Series, validation_data: Optional[Tuple[pd.DataFrame, pd.Series]] = None
+    ) -> Dict[str, Any]:
         """
         Train the claim severity model
 
@@ -90,9 +108,10 @@ class ClaimSeverityModel:
         logger.info("Performing cross-validation...")
         cv_scores = cross_val_score(
             self._create_model(),  # Use fresh model for CV
-            X_scaled, y_transformed,
+            X_scaled,
+            y_transformed,
             cv=KFold(n_splits=5, shuffle=True, random_state=42),
-            scoring='neg_mean_squared_error'
+            scoring="neg_mean_squared_error",
         )
         cv_rmse = np.sqrt(-cv_scores)
 
@@ -102,8 +121,8 @@ class ClaimSeverityModel:
             X_val, y_val = validation_data
             X_val_scaled = self.scaler.transform(X_val)
             y_val_transformed = np.log1p(y_val) if self.log_transform else y_val
-            fit_params['eval_set'] = [(X_val_scaled, y_val_transformed)]
-            fit_params['verbose'] = False
+            fit_params["eval_set"] = [(X_val_scaled, y_val_transformed)]
+            fit_params["verbose"] = False
 
         self.model.fit(X_scaled, y_transformed, **fit_params)
 
@@ -113,16 +132,16 @@ class ClaimSeverityModel:
         train_pred = self.predict(X)
 
         metrics = {
-            'model_type': self.model_type,
-            'cv_rmse_mean': cv_rmse.mean(),
-            'cv_rmse_std': cv_rmse.std(),
-            'train_rmse': np.sqrt(mean_squared_error(y, train_pred)),
-            'train_mae': mean_absolute_error(y, train_pred),
-            'train_r2': r2_score(y, train_pred),
-            'n_features': len(self.feature_names),
-            'n_samples': len(X),
-            'mean_claim_amount': y.mean(),
-            'median_claim_amount': y.median()
+            "model_type": self.model_type,
+            "cv_rmse_mean": cv_rmse.mean(),
+            "cv_rmse_std": cv_rmse.std(),
+            "train_rmse": np.sqrt(mean_squared_error(y, train_pred)),
+            "train_mae": mean_absolute_error(y, train_pred),
+            "train_r2": r2_score(y, train_pred),
+            "n_features": len(self.feature_names),
+            "n_samples": len(X),
+            "mean_claim_amount": y.mean(),
+            "median_claim_amount": y.median(),
         }
 
         logger.info(f"Training completed. CV RMSE: ${cv_rmse.mean():.2f} (+/- ${cv_rmse.std():.2f})")
@@ -172,7 +191,7 @@ class ClaimSeverityModel:
         X_scaled = self.scaler.transform(X)
 
         # Get predictions from individual trees
-        if hasattr(self.model, 'predict'):
+        if hasattr(self.model, "predict"):
             # Use the model's built-in prediction
             predictions = []
 
@@ -213,16 +232,15 @@ class ClaimSeverityModel:
         if not self.is_fitted:
             raise ValueError("Model must be trained before accessing feature importance")
 
-        if hasattr(self.model, 'feature_importances_'):
+        if hasattr(self.model, "feature_importances_"):
             importance_scores = self.model.feature_importances_
         else:
             # For models without feature_importances_, return uniform importance
             importance_scores = np.ones(len(self.feature_names)) / len(self.feature_names)
 
-        importance_df = pd.DataFrame({
-            'feature': self.feature_names,
-            'importance': importance_scores
-        }).sort_values('importance', ascending=False)
+        importance_df = pd.DataFrame({"feature": self.feature_names, "importance": importance_scores}).sort_values(
+            "importance", ascending=False
+        )
 
         return importance_df
 
@@ -232,12 +250,12 @@ class ClaimSeverityModel:
             raise ValueError("Model must be trained before saving")
 
         model_data = {
-            'model': self.model,
-            'scaler': self.scaler,
-            'model_type': self.model_type,
-            'feature_names': self.feature_names,
-            'is_fitted': self.is_fitted,
-            'log_transform': self.log_transform
+            "model": self.model,
+            "scaler": self.scaler,
+            "model_type": self.model_type,
+            "feature_names": self.feature_names,
+            "is_fitted": self.is_fitted,
+            "log_transform": self.log_transform,
         }
 
         joblib.dump(model_data, filepath)
@@ -247,12 +265,12 @@ class ClaimSeverityModel:
         """Load the model from disk"""
         model_data = joblib.load(filepath)
 
-        self.model = model_data['model']
-        self.scaler = model_data['scaler']
-        self.model_type = model_data['model_type']
-        self.feature_names = model_data['feature_names']
-        self.is_fitted = model_data['is_fitted']
-        self.log_transform = model_data.get('log_transform', True)
+        self.model = model_data["model"]
+        self.scaler = model_data["scaler"]
+        self.model_type = model_data["model_type"]
+        self.feature_names = model_data["feature_names"]
+        self.is_fitted = model_data["is_fitted"]
+        self.log_transform = model_data.get("log_transform", True)
 
         logger.info(f"Model loaded from {filepath}")
 
@@ -262,12 +280,12 @@ class ClaimSeverityModel:
             return {}
 
         params = {
-            'model_type': self.model_type,
-            'n_features': len(self.feature_names),
-            'log_transform': self.log_transform
+            "model_type": self.model_type,
+            "n_features": len(self.feature_names),
+            "log_transform": self.log_transform,
         }
 
-        if hasattr(self.model, 'get_params'):
+        if hasattr(self.model, "get_params"):
             params.update(self.model.get_params())
 
         return params

@@ -1,17 +1,17 @@
 {
   "name": "claim_severity",
-  "algorithm": "random_forest",
+  "algorithm": "xgboost",
   "version": "v1",
   "model_path": "model_registry/claim_severity/v1/model.pkl",
-  "created_at": "2025-07-12T19:09:40.114686",
+  "created_at": "2025-07-13T00:06:12.007869",
   "metrics": {
-    "test_rmse": 15204.620589846561,
-    "test_mae": 9092.17512762179,
-    "test_r2": -0.2130016255143774,
-    "test_mape": 3.0560614650844937,
-    "test_median_error": 3789.862079791804,
-    "test_90th_percentile_error": 30409.989664269746,
-    "test_95th_percentile_error": 41507.27224879092
+    "test_rmse": 13548.026474010037,
+    "test_mae": 7732.914526507864,
+    "test_r2": -0.12097650637338409,
+    "test_mape": 2.8476539431877805,
+    "test_median_error": 3655.522371617719,
+    "test_90th_percentile_error": 17511.351351865185,
+    "test_95th_percentile_error": 44185.419699346756
   },
   "feature_names": [
     "trip_duration_minutes",

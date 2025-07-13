@@ -1,28 +1,28 @@
 {
   "model_type": "xgboost",
-  "model_path": "model_registry/claim_probability/v19/model.pkl",
+  "model_path": "model_registry/claim_probability/v1/model.pkl",
   "train_metrics": {
-    "train_accuracy": 0.9756576639775517,
+    "train_accuracy": 0.9760785689231849,
     "train_precision": 0.0,
     "train_recall": 0.0,
     "train_f1": 0.0,
     "train_roc_auc": 0.5,
-    "train_pr_auc": 0.024342336022448265,
-    "train_true_negatives": 13908,
+    "train_pr_auc": 0.02392143107681515,
+    "train_true_negatives": 13914,
     "train_false_positives": 0,
-    "train_false_negatives": 347,
+    "train_false_negatives": 341,
     "train_true_positives": 0
   },
   "test_metrics": {
-    "test_accuracy": 0.9755892255892256,
+    "test_accuracy": 0.9761503928170595,
     "test_precision": 0.0,
     "test_recall": 0.0,
     "test_f1": 0.0,
     "test_roc_auc": 0.5,
-    "test_pr_auc": 0.02441077441077441,
-    "test_true_negatives": 3477,
+    "test_pr_auc": 0.023849607182940515,
+    "test_true_negatives": 3479,
     "test_false_positives": 0,
-    "test_false_negatives": 87,
+    "test_false_negatives": 85,
     "test_true_positives": 0
   },
   "feature_importance": [
@@ -257,5 +257,5 @@
   ],
   "train_size": 14255,
   "test_size": 3564,
-  "positive_rate": 0.024356024468264213
+  "positive_rate": 0.02390706549189068
 }

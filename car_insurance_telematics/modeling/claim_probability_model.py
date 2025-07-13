@@ -3,16 +3,17 @@ Claim Probability Model
 Binary classification model to predict likelihood of insurance claims
 """
 
-import pandas as pd
-import numpy as np
-from typing import Dict, Any, Tuple, Optional
-import xgboost as xgb
-from sklearn.model_selection import cross_val_score, StratifiedKFold
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import roc_auc_score, precision_recall_curve, auc
-import joblib
 import logging
+from typing import Any, Dict, Optional, Tuple
+
+import joblib
+import numpy as np
+import pandas as pd
+import xgboost as xgb
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.metrics import auc, precision_recall_curve, roc_auc_score
+from sklearn.model_selection import StratifiedKFold, cross_val_score
+from sklearn.preprocessing import StandardScaler
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -39,28 +40,46 @@ class ClaimProbabilityModel:
         """Create the base model"""
         if self.model_type == "xgboost":
             params = {
-                'n_estimators': 100,
-                'max_depth': 6,
-                'learning_rate': 0.1,
-                'objective': 'binary:logistic',
-                'use_label_encoder': False,
-                'eval_metric': 'logloss',
-                'random_state': 42,
-                'scale_pos_weight': 1,  # Will be adjusted based on class imbalance
-                'tree_method': 'hist'
+                "n_estimators": 100,
+                "max_depth": 6,
+                "learning_rate": 0.05,
+                "objective": "binary:logistic",
+                "use_label_encoder": False,
+                "eval_metric": "logloss",
+                "random_state": 42,
+                "scale_pos_weight": 6,  # Will be adjusted based on class imbalance
+                "tree_method": "hist",
             }
+            # params = {
+            #     'n_estimators': 300,
+            #     'max_depth': 4,  # Reduced to prevent overfitting on minority class
+            #     'learning_rate': 0.05,  # Lower for better generalization
+            #     'objective': 'binary:logistic',
+            #     'use_label_encoder': False,
+            #     'eval_metric': 'auc',  # Better for imbalanced data than logloss
+            #     'random_state': 42,
+            #     'scale_pos_weight': 6,  # Matches your imbalance ratio
+            #     'tree_method': 'hist',
+            #     'subsample': 0.8,  # Add subsampling
+            #     'colsample_bytree': 0.8,  # Feature subsampling
+            #     'min_child_weight': 5,  # Higher value for imbalanced data
+            #     'gamma': 0.1,  # Minimum loss reduction for split
+            #     'reg_alpha': 0.1,  # L1 regularization
+            #     'reg_lambda': 1.0  # L2 regularization
+            # }
 
             # Add early_stopping_rounds to constructor if provided
             if early_stopping_rounds is not None:
-                params['early_stopping_rounds'] = early_stopping_rounds
-                params['n_estimators'] = 1000  # Set higher when using early stopping
+                params["early_stopping_rounds"] = early_stopping_rounds
+                params["n_estimators"] = 1000  # Set higher when using early stopping
 
             return xgb.XGBClassifier(**params)
         else:
             raise ValueError(f"Unknown model type: {self.model_type}")
 
-    def train(self, X: pd.DataFrame, y: pd.Series, 
-              validation_data: Optional[Tuple[pd.DataFrame, pd.Series]] = None) -> Dict[str, Any]:
+    def train(
+        self, X: pd.DataFrame, y: pd.Series, validation_data: Optional[Tuple[pd.DataFrame, pd.Series]] = None
+    ) -> Dict[str, Any]:
         """
         Train the claim probability model
 
@@ -92,9 +111,10 @@ class ClaimProbabilityModel:
         logger.info("Performing cross-validation...")
         cv_scores = cross_val_score(
             self._create_model(),  # Use fresh model for CV
-            X_scaled, y, 
+            X_scaled,
+            y,
             cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
-            scoring='roc_auc'
+            scoring="roc_auc",
         )
 
         # Train the model
@@ -102,16 +122,14 @@ class ClaimProbabilityModel:
         if validation_data is not None:
             X_val, y_val = validation_data
             X_val_scaled = self.scaler.transform(X_val)
-            fit_params['eval_set'] = [(X_val_scaled, y_val)]
-            fit_params['verbose'] = False
+            fit_params["eval_set"] = [(X_val_scaled, y_val)]
+            fit_params["verbose"] = False
 
         self.model.fit(X_scaled, y, **fit_params)
 
         # Calibrate probabilities
         logger.info("Calibrating model probabilities...")
-        self.calibrated_model = CalibratedClassifierCV(
-            self.model, method='sigmoid', cv=3
-        )
+        self.calibrated_model = CalibratedClassifierCV(self.model, method="sigmoid", cv=3)
         self.calibrated_model.fit(X_scaled, y)
 
         self.is_fitted = True
@@ -125,14 +143,14 @@ class ClaimProbabilityModel:
         pr_auc = auc(recall, precision)
 
         metrics = {
-            'model_type': self.model_type,
-            'cv_auc_mean': cv_scores.mean(),
-            'cv_auc_std': cv_scores.std(),
-            'train_auc': train_auc,
-            'train_pr_auc': pr_auc,
-            'n_features': len(self.feature_names),
-            'n_samples': len(X),
-            'positive_rate': y.mean()
+            "model_type": self.model_type,
+            "cv_auc_mean": cv_scores.mean(),
+            "cv_auc_std": cv_scores.std(),
+            "train_auc": train_auc,
+            "train_pr_auc": pr_auc,
+            "n_features": len(self.feature_names),
+            "n_samples": len(X),
+            "positive_rate": y.mean(),
         }
 
         logger.info(f"Training completed. CV AUC: {cv_scores.mean():.4f} (+/- {cv_scores.std():.4f})")
@@ -182,16 +200,15 @@ class ClaimProbabilityModel:
         if not self.is_fitted:
             raise ValueError("Model must be trained before accessing feature importance")
 
-        if hasattr(self.model, 'feature_importances_'):
+        if hasattr(self.model, "feature_importances_"):
             importance_scores = self.model.feature_importances_
         else:
             # For models without feature_importances_, return uniform importance
             importance_scores = np.ones(len(self.feature_names)) / len(self.feature_names)
 
-        importance_df = pd.DataFrame({
-            'feature': self.feature_names,
-            'importance': importance_scores
-        }).sort_values('importance', ascending=False)
+        importance_df = pd.DataFrame({"feature": self.feature_names, "importance": importance_scores}).sort_values(
+            "importance", ascending=False
+        )
 
         return importance_df
 
@@ -201,12 +218,12 @@ class ClaimProbabilityModel:
             raise ValueError("Model must be trained before saving")
 
         model_data = {
-            'model': self.model,
-            'calibrated_model': self.calibrated_model,
-            'scaler': self.scaler,
-            'model_type': self.model_type,
-            'feature_names': self.feature_names,
-            'is_fitted': self.is_fitted
+            "model": self.model,
+            "calibrated_model": self.calibrated_model,
+            "scaler": self.scaler,
+            "model_type": self.model_type,
+            "feature_names": self.feature_names,
+            "is_fitted": self.is_fitted,
         }
 
         joblib.dump(model_data, filepath)
@@ -216,12 +233,12 @@ class ClaimProbabilityModel:
         """Load the model from disk"""
         model_data = joblib.load(filepath)
 
-        self.model = model_data['model']
-        self.calibrated_model = model_data['calibrated_model']
-        self.scaler = model_data['scaler']
-        self.model_type = model_data['model_type']
-        self.feature_names = model_data['feature_names']
-        self.is_fitted = model_data['is_fitted']
+        self.model = model_data["model"]
+        self.calibrated_model = model_data["calibrated_model"]
+        self.scaler = model_data["scaler"]
+        self.model_type = model_data["model_type"]
+        self.feature_names = model_data["feature_names"]
+        self.is_fitted = model_data["is_fitted"]
 
         logger.info(f"Model loaded from {filepath}")
 
@@ -231,11 +248,11 @@ class ClaimProbabilityModel:
             return {}
 
         params = {
-            'model_type': self.model_type,
-            'n_features': len(self.feature_names),
+            "model_type": self.model_type,
+            "n_features": len(self.feature_names),
         }
 
-        if hasattr(self.model, 'get_params'):
+        if hasattr(self.model, "get_params"):
             params.update(self.model.get_params())
 
         return params
