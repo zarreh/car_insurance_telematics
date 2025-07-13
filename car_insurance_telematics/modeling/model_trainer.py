@@ -19,12 +19,11 @@ from sklearn.model_selection import train_test_split
 
 from model_registry import ModelRegistry
 
-log_level: str = "INFO"
 logging.basicConfig(
-        level=getattr(logging, log_level.upper()),
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[logging.FileHandler("logs/model_training.log"), logging.StreamHandler()],
-    )
+    level=getattr(logging, "INFO"),
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("logs/model_training.log"), logging.StreamHandler()],
+)
 logger = logging.getLogger(__name__)
 
 
@@ -175,14 +174,14 @@ class ModelTrainer:
         # Prepare results
         # Prepare results
         results = {
-            'model_type': model_type,
-            'model_path': model_path,
-            'train_metrics': train_metrics,
-            'test_metrics': test_metrics,
-            'feature_importance': feature_importance.to_dict('records') if feature_importance is not None else [],
-            'train_size': len(X_train),
-            'test_size': len(X_test),
-            'positive_rate': float(claim_target.mean())
+            "model_type": model_type,
+            "model_path": model_path,
+            "train_metrics": train_metrics,
+            "test_metrics": test_metrics,
+            "feature_importance": feature_importance.to_dict("records") if feature_importance is not None else [],
+            "train_size": len(X_train),
+            "test_size": len(X_test),
+            "positive_rate": float(claim_target.mean()),
         }
 
         # Save results
@@ -254,15 +253,15 @@ class ModelTrainer:
 
         # Prepare results
         results = {
-            'model_type': model_type,
-            'model_path': model_path,
-            'train_metrics': train_metrics,
-            'test_metrics': test_metrics,
-            'feature_importance': feature_importance.to_dict('records') if feature_importance is not None else [],
-            'train_size': len(X_train),
-            'test_size': len(X_test),
-            'mean_claim_amount': float(severity_with_claims.mean()),
-            'median_claim_amount': float(severity_with_claims.median())
+            "model_type": model_type,
+            "model_path": model_path,
+            "train_metrics": train_metrics,
+            "test_metrics": test_metrics,
+            "feature_importance": feature_importance.to_dict("records") if feature_importance is not None else [],
+            "train_size": len(X_train),
+            "test_size": len(X_test),
+            "mean_claim_amount": float(severity_with_claims.mean()),
+            "median_claim_amount": float(severity_with_claims.median()),
         }
         # Save results
         results_path = os.path.join(self.output_dir, f"claim_severity_{model_type}_results.json")
