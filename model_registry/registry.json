@@ -20,7 +20,7 @@
         "algorithm": "random_forest",
         "feature_count": 57
       },
-      "latest": "v9",
+      "latest": "v12",
       "v2": {
         "path": "model_registry/claim_probability/v2/model.pkl",
         "info_path": "model_registry/claim_probability/v2/model_info.json",
@@ -172,6 +172,63 @@
         },
         "algorithm": "random_forest",
         "feature_count": 57
+      },
+      "v10": {
+        "path": "model_registry/claim_probability/v10/model.pkl",
+        "info_path": "model_registry/claim_probability/v10/model_info.json",
+        "created_at": "2025-07-12T19:57:11.825772",
+        "metrics": {
+          "test_accuracy": 0.9744668911335578,
+          "test_precision": 0.0,
+          "test_recall": 0.0,
+          "test_f1": 0.0,
+          "test_roc_auc": 0.5,
+          "test_pr_auc": 0.025533108866442198,
+          "test_true_negatives": 3473,
+          "test_false_positives": 0,
+          "test_false_negatives": 91,
+          "test_true_positives": 0
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v11": {
+        "path": "model_registry/claim_probability/v11/model.pkl",
+        "info_path": "model_registry/claim_probability/v11/model_info.json",
+        "created_at": "2025-07-12T20:18:11.164994",
+        "metrics": {
+          "test_accuracy": 0.9758698092031426,
+          "test_precision": 0.0,
+          "test_recall": 0.0,
+          "test_f1": 0.0,
+          "test_roc_auc": 0.5,
+          "test_pr_auc": 0.024130190796857465,
+          "test_true_negatives": 3478,
+          "test_false_positives": 0,
+          "test_false_negatives": 86,
+          "test_true_positives": 0
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v12": {
+        "path": "model_registry/claim_probability/v12/model.pkl",
+        "info_path": "model_registry/claim_probability/v12/model_info.json",
+        "created_at": "2025-07-12T20:18:18.956256",
+        "metrics": {
+          "test_accuracy": 0.9741863075196409,
+          "test_precision": 0.0,
+          "test_recall": 0.0,
+          "test_f1": 0.0,
+          "test_roc_auc": 0.5,
+          "test_pr_auc": 0.025813692480359147,
+          "test_true_negatives": 3472,
+          "test_false_positives": 0,
+          "test_false_negatives": 92,
+          "test_true_positives": 0
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
       }
     },
     "claim_severity": {
@@ -191,7 +248,7 @@
         "algorithm": "random_forest",
         "feature_count": 57
       },
-      "latest": "v6",
+      "latest": "v9",
       "v2": {
         "path": "model_registry/claim_severity/v2/model.pkl",
         "info_path": "model_registry/claim_severity/v2/model_info.json",
@@ -271,11 +328,59 @@
         },
         "algorithm": "random_forest",
         "feature_count": 57
+      },
+      "v7": {
+        "path": "model_registry/claim_severity/v7/model.pkl",
+        "info_path": "model_registry/claim_severity/v7/model_info.json",
+        "created_at": "2025-07-12T19:57:14.177845",
+        "metrics": {
+          "test_rmse": 10488.175943173917,
+          "test_mae": 6272.1754850553325,
+          "test_r2": -0.12174179316707368,
+          "test_mape": 2.51980417294131,
+          "test_median_error": 3166.52449146844,
+          "test_90th_percentile_error": 17005.854399105952,
+          "test_95th_percentile_error": 24823.122452223146
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v8": {
+        "path": "model_registry/claim_severity/v8/model.pkl",
+        "info_path": "model_registry/claim_severity/v8/model_info.json",
+        "created_at": "2025-07-12T20:18:13.395618",
+        "metrics": {
+          "test_rmse": 17194.862239099697,
+          "test_mae": 10112.752213604106,
+          "test_r2": -0.2639011022450768,
+          "test_mape": 3.0432368186194885,
+          "test_median_error": 3305.5447688278346,
+          "test_90th_percentile_error": 39204.48673746631,
+          "test_95th_percentile_error": 45975.54809686041
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v9": {
+        "path": "model_registry/claim_severity/v9/model.pkl",
+        "info_path": "model_registry/claim_severity/v9/model_info.json",
+        "created_at": "2025-07-12T20:18:22.186765",
+        "metrics": {
+          "test_rmse": 15365.876556512385,
+          "test_mae": 8799.554859029418,
+          "test_r2": -0.18862464996050377,
+          "test_mape": 2.4609893235357188,
+          "test_median_error": 3345.199584246213,
+          "test_90th_percentile_error": 31951.259127446625,
+          "test_95th_percentile_error": 43956.86504088544
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
       }
     }
   },
   "metadata": {
     "created_at": "2025-07-12T18:38:50.371361",
-    "last_updated": "2025-07-12T19:26:37.187144"
+    "last_updated": "2025-07-12T20:18:22.187025"
   }
 }

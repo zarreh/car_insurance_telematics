@@ -13,7 +13,7 @@ import pandas as pd
 # Add the modeling directory to path if needed
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from inference_pipeline import InferencePipeline
+from car_insurance_telematics.modeling.inference_pipeline import InferencePipeline
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -60,6 +60,21 @@ def main():
     parser.add_argument("--use-sample-data", action="store_true", help="Use sample data for testing")
     parser.add_argument("--no-uncertainty", action="store_true", help="Disable uncertainty estimates")
     parser.add_argument("--export-production", action="store_true", help="Export models for production deployment")
+    # # make argument for single prediction
+    # parser.add_argument(
+    #     "--model-type",
+    #     type=str,
+    #     default="random_forest",
+    #     choices=["random_forest", "gradient_boosting", "logistic_regression"],
+    #     help="Model type for claim probability",
+    # )
+    # parser.add_argument(
+    #     "--severity-model-type",
+    #     type=str,
+    #     default="random_forest",
+    #     choices=["random_forest", "gradient_boosting", "linear", "ridge", "lasso"],
+    #     help="Model type for claim severity",
+    # )
 
     args = parser.parse_args()
 

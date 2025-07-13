@@ -11,7 +11,7 @@ import sys
 # Add the modeling directory to path if needed
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from model_trainer import ModelTrainer
+from car_insurance_telematics.modeling.model_trainer import ModelTrainer
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
