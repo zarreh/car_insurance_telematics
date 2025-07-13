@@ -19,3 +19,4 @@ black = "^25.1.0"
 isort = "^6.0.1"
 xgboost = "^3.0.2"
 optuna = "^4.4.0"
+optuna-integration = {extras = ["xgboost"], version = "^4.4.0"}

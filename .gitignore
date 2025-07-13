@@ -7,6 +7,7 @@ __pycache__/
 chroma_db*/
 notebooks/*.csv
 notebooks/*.json
+notebooks/*.png
 *.ipynb_checkpoints
 *.pyc
 *.pyo
