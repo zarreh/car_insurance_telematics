@@ -1,0 +1,18 @@
+{
+  "trip_id": "trip_20250706_0800",
+  "device_id": "hashed_19599838",
+  "duration_minutes": 4.983333333333333,
+  "distance_miles": 2.5,
+  "average_speed_mph": 36.51067921439644,
+  "max_speed_mph": 59.025803171804945,
+  "speeding_percent": 0.0,
+  "harsh_braking_events": "0",
+  "harsh_acceleration_events": "0",
+  "sharp_cornering_events": "0",
+  "phone_usage_seconds": "9",
+  "night_driving": 0,
+  "rush_hour": 1,
+  "start_location": "zone_A1",
+  "end_location": "zone_B3",
+  "time_of_day": "morning_commute"
+}

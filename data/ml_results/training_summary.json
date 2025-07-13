@@ -1,0 +1,17 @@
+{
+  "training_completed": "2025-07-12T19:26:28.447235",
+  "training_duration_seconds": 8.467149,
+  "models": {
+    "claim_probability": {
+      "model_type": "random_forest",
+      "test_auc": 0.5,
+      "model_path": "model_registry/claim_probability/v8/model.pkl"
+    },
+    "claim_severity": {
+      "model_type": "random_forest",
+      "test_rmse": 13096.311081726999,
+      "test_r2": -0.20453725830334535,
+      "model_path": "model_registry/claim_severity/v5/model.pkl"
+    }
+  }
+}

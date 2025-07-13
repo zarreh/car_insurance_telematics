@@ -1,0 +1,281 @@
+{
+  "models": {
+    "claim_probability": {
+      "v1": {
+        "path": "model_registry/claim_probability/v1/model.pkl",
+        "info_path": "model_registry/claim_probability/v1/model_info.json",
+        "created_at": "2025-07-12T18:38:56.437818",
+        "metrics": {
+          "test_accuracy": 0.9764309764309764,
+          "test_precision": 0.0,
+          "test_recall": 0.0,
+          "test_f1": 0.0,
+          "test_roc_auc": 0.5,
+          "test_pr_auc": 0.02356902356902357,
+          "test_true_negatives": 3480,
+          "test_false_positives": 0,
+          "test_false_negatives": 84,
+          "test_true_positives": 0
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "latest": "v9",
+      "v2": {
+        "path": "model_registry/claim_probability/v2/model.pkl",
+        "info_path": "model_registry/claim_probability/v2/model_info.json",
+        "created_at": "2025-07-12T18:41:07.947219",
+        "metrics": {
+          "test_accuracy": 0.9758698092031426,
+          "test_precision": 0.0,
+          "test_recall": 0.0,
+          "test_f1": 0.0,
+          "test_roc_auc": 0.5,
+          "test_pr_auc": 0.024130190796857465,
+          "test_true_negatives": 3478,
+          "test_false_positives": 0,
+          "test_false_negatives": 86,
+          "test_true_positives": 0
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v3": {
+        "path": "model_registry/claim_probability/v3/model.pkl",
+        "info_path": "model_registry/claim_probability/v3/model_info.json",
+        "created_at": "2025-07-12T19:08:50.742777",
+        "metrics": {
+          "test_accuracy": 0.9761503928170595,
+          "test_precision": 0.0,
+          "test_recall": 0.0,
+          "test_f1": 0.0,
+          "test_roc_auc": 0.5,
+          "test_pr_auc": 0.023849607182940515,
+          "test_true_negatives": 3479,
+          "test_false_positives": 0,
+          "test_false_negatives": 85,
+          "test_true_positives": 0
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v4": {
+        "path": "model_registry/claim_probability/v4/model.pkl",
+        "info_path": "model_registry/claim_probability/v4/model_info.json",
+        "created_at": "2025-07-12T19:09:37.968114",
+        "metrics": {
+          "test_accuracy": 0.9744668911335578,
+          "test_precision": 0.0,
+          "test_recall": 0.0,
+          "test_f1": 0.0,
+          "test_roc_auc": 0.5,
+          "test_pr_auc": 0.025533108866442198,
+          "test_true_negatives": 3473,
+          "test_false_positives": 0,
+          "test_false_negatives": 91,
+          "test_true_positives": 0
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v5": {
+        "path": "model_registry/claim_probability/v5/model.pkl",
+        "info_path": "model_registry/claim_probability/v5/model_info.json",
+        "created_at": "2025-07-12T19:09:45.706241",
+        "metrics": {
+          "test_accuracy": 0.9744668911335578,
+          "test_precision": 0.0,
+          "test_recall": 0.0,
+          "test_f1": 0.0,
+          "test_roc_auc": 0.5,
+          "test_pr_auc": 0.025533108866442198,
+          "test_true_negatives": 3473,
+          "test_false_positives": 0,
+          "test_false_negatives": 91,
+          "test_true_positives": 0
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v6": {
+        "path": "model_registry/claim_probability/v6/model.pkl",
+        "info_path": "model_registry/claim_probability/v6/model_info.json",
+        "created_at": "2025-07-12T19:16:21.612395",
+        "metrics": {
+          "test_accuracy": 0.9775533108866442,
+          "test_precision": 0.0,
+          "test_recall": 0.0,
+          "test_f1": 0.0,
+          "test_roc_auc": 0.5,
+          "test_pr_auc": 0.02244668911335578,
+          "test_true_negatives": 3484,
+          "test_false_positives": 0,
+          "test_false_negatives": 80,
+          "test_true_positives": 0
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v7": {
+        "path": "model_registry/claim_probability/v7/model.pkl",
+        "info_path": "model_registry/claim_probability/v7/model_info.json",
+        "created_at": "2025-07-12T19:16:29.610417",
+        "metrics": {
+          "test_accuracy": 0.97334455667789,
+          "test_precision": 0.0,
+          "test_recall": 0.0,
+          "test_f1": 0.0,
+          "test_roc_auc": 0.5,
+          "test_pr_auc": 0.02665544332210999,
+          "test_true_negatives": 3469,
+          "test_false_positives": 0,
+          "test_false_negatives": 95,
+          "test_true_positives": 0
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v8": {
+        "path": "model_registry/claim_probability/v8/model.pkl",
+        "info_path": "model_registry/claim_probability/v8/model_info.json",
+        "created_at": "2025-07-12T19:26:26.168379",
+        "metrics": {
+          "test_accuracy": 0.9744668911335578,
+          "test_precision": 0.0,
+          "test_recall": 0.0,
+          "test_f1": 0.0,
+          "test_roc_auc": 0.5,
+          "test_pr_auc": 0.025533108866442198,
+          "test_true_negatives": 3473,
+          "test_false_positives": 0,
+          "test_false_negatives": 91,
+          "test_true_positives": 0
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v9": {
+        "path": "model_registry/claim_probability/v9/model.pkl",
+        "info_path": "model_registry/claim_probability/v9/model_info.json",
+        "created_at": "2025-07-12T19:26:33.937057",
+        "metrics": {
+          "test_accuracy": 0.9764309764309764,
+          "test_precision": 0.0,
+          "test_recall": 0.0,
+          "test_f1": 0.0,
+          "test_roc_auc": 0.5,
+          "test_pr_auc": 0.02356902356902357,
+          "test_true_negatives": 3480,
+          "test_false_positives": 0,
+          "test_false_negatives": 84,
+          "test_true_positives": 0
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      }
+    },
+    "claim_severity": {
+      "v1": {
+        "path": "model_registry/claim_severity/v1/model.pkl",
+        "info_path": "model_registry/claim_severity/v1/model_info.json",
+        "created_at": "2025-07-12T19:09:40.114686",
+        "metrics": {
+          "test_rmse": 15204.620589846561,
+          "test_mae": 9092.17512762179,
+          "test_r2": -0.2130016255143774,
+          "test_mape": 3.0560614650844937,
+          "test_median_error": 3789.862079791804,
+          "test_90th_percentile_error": 30409.989664269746,
+          "test_95th_percentile_error": 41507.27224879092
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "latest": "v6",
+      "v2": {
+        "path": "model_registry/claim_severity/v2/model.pkl",
+        "info_path": "model_registry/claim_severity/v2/model_info.json",
+        "created_at": "2025-07-12T19:09:49.098624",
+        "metrics": {
+          "test_rmse": 15424.912476728789,
+          "test_mae": 8728.424185675676,
+          "test_r2": -0.23997326663468677,
+          "test_mape": 1.930255429764645,
+          "test_median_error": 3223.2647121192404,
+          "test_90th_percentile_error": 31658.01093277248,
+          "test_95th_percentile_error": 45703.81915868891
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v3": {
+        "path": "model_registry/claim_severity/v3/model.pkl",
+        "info_path": "model_registry/claim_severity/v3/model_info.json",
+        "created_at": "2025-07-12T19:16:24.061104",
+        "metrics": {
+          "test_rmse": 14012.904556261192,
+          "test_mae": 7863.405908867969,
+          "test_r2": -0.15808727267394285,
+          "test_mape": 3.2431672016588453,
+          "test_median_error": 3577.1644737419847,
+          "test_90th_percentile_error": 21507.466467717528,
+          "test_95th_percentile_error": 45604.88927393616
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v4": {
+        "path": "model_registry/claim_severity/v4/model.pkl",
+        "info_path": "model_registry/claim_severity/v4/model_info.json",
+        "created_at": "2025-07-12T19:16:32.928369",
+        "metrics": {
+          "test_rmse": 14521.862707009635,
+          "test_mae": 8094.034238129016,
+          "test_r2": -0.19269236660219646,
+          "test_mape": 2.1195299102572704,
+          "test_median_error": 2980.6136361380386,
+          "test_90th_percentile_error": 25516.31318309016,
+          "test_95th_percentile_error": 44625.27498132447
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v5": {
+        "path": "model_registry/claim_severity/v5/model.pkl",
+        "info_path": "model_registry/claim_severity/v5/model_info.json",
+        "created_at": "2025-07-12T19:26:28.444553",
+        "metrics": {
+          "test_rmse": 13096.311081726999,
+          "test_mae": 7791.916823790831,
+          "test_r2": -0.20453725830334535,
+          "test_mape": 2.419433540114129,
+          "test_median_error": 3115.9480851429244,
+          "test_90th_percentile_error": 25564.73056368797,
+          "test_95th_percentile_error": 30591.52947361186
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      },
+      "v6": {
+        "path": "model_registry/claim_severity/v6/model.pkl",
+        "info_path": "model_registry/claim_severity/v6/model_info.json",
+        "created_at": "2025-07-12T19:26:37.186932",
+        "metrics": {
+          "test_rmse": 16698.84431091375,
+          "test_mae": 9762.647715285744,
+          "test_r2": -0.26306615884116336,
+          "test_mape": 2.2959751643370394,
+          "test_median_error": 3382.205421310986,
+          "test_90th_percentile_error": 32299.006081332554,
+          "test_95th_percentile_error": 46115.990203949834
+        },
+        "algorithm": "random_forest",
+        "feature_count": 57
+      }
+    }
+  },
+  "metadata": {
+    "created_at": "2025-07-12T18:38:50.371361",
+    "last_updated": "2025-07-12T19:26:37.187144"
+  }
+}

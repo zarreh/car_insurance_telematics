@@ -1,0 +1,16 @@
+{
+  "claim_probability": {
+    "random_forest": {
+      "test_auc": 0.5,
+      "test_pr_auc": 0.02356902356902357,
+      "test_f1": 0.0
+    }
+  },
+  "claim_severity": {
+    "random_forest": {
+      "test_rmse": 16698.84431091375,
+      "test_r2": -0.26306615884116336,
+      "test_mae": 9762.647715285744
+    }
+  }
+}

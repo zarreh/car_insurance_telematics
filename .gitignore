@@ -1,0 +1,15 @@
+env_genai/
+genai_docs/
+.vscode
+.env
+.*/
+__pycache__/
+chroma_db*/
+notebooks/*.csv
+notebooks/*.json
+*.ipynb_checkpoints
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.pkl.gz
