@@ -1,16 +1,16 @@
 {
   "claim_probability": {
-    "random_forest": {
+    "xgboost": {
       "test_auc": 0.5,
-      "test_pr_auc": 0.025813692480359147,
+      "test_pr_auc": 0.025533108866442198,
       "test_f1": 0.0
     }
   },
   "claim_severity": {
-    "random_forest": {
-      "test_rmse": 15365.876556512385,
-      "test_r2": -0.18862464996050377,
-      "test_mae": 8799.554859029418
+    "xgboost": {
+      "test_rmse": 15964.806717285328,
+      "test_r2": -0.20407066233230142,
+      "test_mae": 8394.872797645494
     }
   }
 }

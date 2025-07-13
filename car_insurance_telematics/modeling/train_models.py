@@ -7,6 +7,7 @@ import argparse
 import logging
 import os
 import sys
+import pandas as pd
 
 # Add the modeling directory to path if needed
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -33,15 +34,15 @@ def main():
     parser.add_argument(
         "--prob-model",
         type=str,
-        default="random_forest",
-        choices=["random_forest", "gradient_boosting", "logistic_regression"],
+        default="xgboost",
+        choices=["xgboost", "random_forest", "gradient_boosting", "logistic_regression"],
         help="Model type for claim probability",
     )
     parser.add_argument(
         "--severity-model",
         type=str,
-        default="random_forest",
-        choices=["random_forest", "gradient_boosting", "linear", "ridge", "lasso"],
+        default="xgboost",
+        choices=["xgboost", "random_forest", "gradient_boosting", "linear", "ridge", "lasso"],
         help="Model type for claim severity",
     )
     parser.add_argument("--compare-models", action="store_true", help="Compare multiple model types")
@@ -120,8 +121,17 @@ def main():
             print("Top 10 Important Features (Claim Probability):")
             print("-" * 30)
             prob_importance = results["probability_model"]["results"]["feature_importance"]
-            for idx, row in prob_importance.head(10).iterrows():
-                print(f"{row['feature']:30s} {row['importance']:.4f}")
+            if isinstance(prob_importance, pd.DataFrame):
+                for idx, row in prob_importance.head(10).iterrows():
+                    print(f"{row['feature']:30s} {row['importance']:.4f}")
+            else:
+                # Handle case where feature_importance is a list of tuples or dict
+                if isinstance(prob_importance, list):
+                    for item in prob_importance[:10]:
+                        if isinstance(item, dict):
+                            print(f"{item['feature']:30s} {item['importance']:.4f}")
+                        elif isinstance(item, tuple):
+                            print(f"{item[0]:30s} {item[1]:.4f}")
 
             print("Model Paths:")
             print("-" * 30)

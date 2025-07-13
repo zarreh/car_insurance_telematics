@@ -119,7 +119,7 @@ class ModelTrainer:
 
         return features, claim_probability_target, claim_severity_target
 
-    def train_claim_probability_model(self, model_type: str = "random_forest") -> Dict[str, Any]:
+    def train_claim_probability_model(self, model_type: str = "xgboost") -> Dict[str, Any]:
         """
         Train the claim probability model
 
@@ -195,7 +195,7 @@ class ModelTrainer:
 
         return results
 
-    def train_claim_severity_model(self, model_type: str = "random_forest") -> Dict[str, Any]:
+    def train_claim_severity_model(self, model_type: str = "xgboost") -> Dict[str, Any]:
         """
         Train the claim severity model
 
@@ -275,7 +275,7 @@ class ModelTrainer:
         return results
 
     def train_all_models(
-        self, probability_model_type: str = "random_forest", severity_model_type: str = "random_forest"
+        self, probability_model_type: str = "xgboost", severity_model_type: str = "xgboost"
     ) -> Dict[str, Any]:
         """
         Train both claim probability and severity models
@@ -335,7 +335,7 @@ class ModelTrainer:
         }
 
     def compare_models(
-        self, model_types: list = ["random_forest", "gradient_boosting", "logistic_regression"]
+        self, model_types: list = ["xgboost", "random_forest", "gradient_boosting", "logistic_regression"]
     ) -> Dict[str, Any]:
         """
         Compare different model types

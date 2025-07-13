@@ -1,17 +1,17 @@
 {
-  "training_completed": "2025-07-12T20:18:13.398234",
-  "training_duration_seconds": 8.184662,
+  "training_completed": "2025-07-12T23:46:44.968204",
+  "training_duration_seconds": 25.08694,
   "models": {
     "claim_probability": {
-      "model_type": "random_forest",
+      "model_type": "xgboost",
       "test_auc": 0.5,
-      "model_path": "model_registry/claim_probability/v11/model.pkl"
+      "model_path": "model_registry/claim_probability/v19/model.pkl"
     },
     "claim_severity": {
-      "model_type": "random_forest",
-      "test_rmse": 17194.862239099697,
-      "test_r2": -0.2639011022450768,
-      "model_path": "model_registry/claim_severity/v8/model.pkl"
+      "model_type": "xgboost",
+      "test_rmse": 16296.026270430688,
+      "test_r2": -0.26971339370676417,
+      "model_path": "model_registry/claim_severity/v15/model.pkl"
     }
   }
 }

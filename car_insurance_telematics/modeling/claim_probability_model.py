@@ -1,251 +1,241 @@
 """
 Claim Probability Model
-Binary classification model to predict the likelihood of insurance claims
+Binary classification model to predict likelihood of insurance claims
 """
 
-import logging
-from datetime import datetime
-from typing import Any, Dict, Optional
-
-import joblib
-import numpy as np
 import pandas as pd
+import numpy as np
+from typing import Dict, Any, Tuple, Optional
+import xgboost as xgb
+from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.calibration import CalibratedClassifierCV
-from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import auc, precision_recall_curve, roc_auc_score
-from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import roc_auc_score, precision_recall_curve, auc
+import joblib
+import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class ClaimProbabilityModel:
-    """Binary classification model for claim probability prediction"""
+    """Model for predicting claim probability"""
 
-    def __init__(self, model_type: str = "random_forest", **kwargs):
+    def __init__(self, model_type: str = "xgboost"):
         """
         Initialize the claim probability model
 
         Args:
-            model_type: Type of model ('random_forest', 'gradient_boosting', 'logistic_regression')
-            **kwargs: Additional parameters for the model
+            model_type: Type of model to use
         """
         self.model_type = model_type
         self.model = None
         self.scaler = StandardScaler()
-        self.feature_importance = None
-        self.model_params = kwargs
         self.is_fitted = False
-        self.training_metadata = {}
+        self.feature_names = None
+        self.calibrated_model = None
 
-        # Initialize model based on type
-        self._initialize_model()
-
-    def _initialize_model(self):
-        """Initialize the underlying ML model"""
-        if self.model_type == "random_forest":
-            default_params = {
-                "n_estimators": 200,
-                "max_depth": 10,
-                "min_samples_split": 20,
-                "min_samples_leaf": 10,
-                "class_weight": "balanced",
-                "random_state": 42,
-                "n_jobs": -1,
+    def _create_model(self, early_stopping_rounds: Optional[int] = None) -> xgb.XGBClassifier:
+        """Create the base model"""
+        if self.model_type == "xgboost":
+            params = {
+                'n_estimators': 100,
+                'max_depth': 6,
+                'learning_rate': 0.1,
+                'objective': 'binary:logistic',
+                'use_label_encoder': False,
+                'eval_metric': 'logloss',
+                'random_state': 42,
+                'scale_pos_weight': 1,  # Will be adjusted based on class imbalance
+                'tree_method': 'hist'
             }
-            default_params.update(self.model_params)
-            self.model = RandomForestClassifier(**default_params)
 
-        elif self.model_type == "gradient_boosting":
-            default_params = {
-                "n_estimators": 100,
-                "learning_rate": 0.1,
-                "max_depth": 5,
-                "subsample": 0.8,
-                "random_state": 42,
-            }
-            default_params.update(self.model_params)
-            self.model = GradientBoostingClassifier(**default_params)
+            # Add early_stopping_rounds to constructor if provided
+            if early_stopping_rounds is not None:
+                params['early_stopping_rounds'] = early_stopping_rounds
+                params['n_estimators'] = 1000  # Set higher when using early stopping
 
-        elif self.model_type == "logistic_regression":
-            default_params = {
-                "penalty": "l2",
-                "C": 1.0,
-                "class_weight": "balanced",
-                "random_state": 42,
-                "max_iter": 1000,
-            }
-            default_params.update(self.model_params)
-            self.model = LogisticRegression(**default_params)
+            return xgb.XGBClassifier(**params)
         else:
             raise ValueError(f"Unknown model type: {self.model_type}")
 
-    def train(
-        self,
-        X_train: pd.DataFrame,
-        y_train: pd.Series,
-        X_val: Optional[pd.DataFrame] = None,
-        y_val: Optional[pd.Series] = None,
-        calibrate: bool = True,
-    ) -> Dict[str, Any]:
+    def train(self, X: pd.DataFrame, y: pd.Series, 
+              validation_data: Optional[Tuple[pd.DataFrame, pd.Series]] = None) -> Dict[str, Any]:
         """
         Train the claim probability model
 
         Args:
-            X_train: Training features
-            y_train: Training labels
-            X_val: Validation features (optional)
-            y_val: Validation labels (optional)
-            calibrate: Whether to calibrate probabilities
+            X: Feature matrix
+            y: Target labels (0/1)
+            validation_data: Optional tuple of (X_val, y_val)
 
         Returns:
-            Dictionary containing training metrics
+            Dictionary with training metrics
         """
         logger.info(f"Training {self.model_type} model...")
 
-        # Store training metadata
-        self.training_metadata = {
-            "model_type": self.model_type,
-            "n_samples": len(X_train),
-            "n_features": X_train.shape[1],
-            "feature_names": list(X_train.columns),
-            "class_distribution": y_train.value_counts().to_dict(),
-            "training_date": datetime.now().isoformat(),
-        }
+        # Store feature names
+        self.feature_names = X.columns.tolist()
+
+        # Handle class imbalance
+        pos_weight = len(y[y == 0]) / len(y[y == 1])
+
+        # Create and configure model
+        early_stopping = 10 if validation_data is not None else None
+        self.model = self._create_model(early_stopping_rounds=early_stopping)
+        self.model.scale_pos_weight = pos_weight
 
         # Scale features
-        X_train_scaled = self.scaler.fit_transform(X_train)
+        X_scaled = self.scaler.fit_transform(X)
 
         # Perform cross-validation
-        cv_scores = self._cross_validate(X_train_scaled, y_train)
+        logger.info("Performing cross-validation...")
+        cv_scores = cross_val_score(
+            self._create_model(),  # Use fresh model for CV
+            X_scaled, y, 
+            cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
+            scoring='roc_auc'
+        )
 
         # Train the model
-        self.model.fit(X_train_scaled, y_train)
-
-        # Calibrate probabilities if requested
-        if calibrate and self.model_type != "logistic_regression":
-            logger.info("Calibrating model probabilities...")
-            self.model = CalibratedClassifierCV(self.model, cv=3, method="sigmoid")
-            self.model.fit(X_train_scaled, y_train)
-
-        # Extract feature importance
-        self._extract_feature_importance(X_train.columns)
-
-        # Evaluate on validation set if provided
-        val_metrics = {}
-        if X_val is not None and y_val is not None:
+        fit_params = {}
+        if validation_data is not None:
+            X_val, y_val = validation_data
             X_val_scaled = self.scaler.transform(X_val)
-            val_metrics = self._evaluate(X_val_scaled, y_val, prefix="val_")
+            fit_params['eval_set'] = [(X_val_scaled, y_val)]
+            fit_params['verbose'] = False
 
-        # Evaluate on training set
-        train_metrics = self._evaluate(X_train_scaled, y_train, prefix="train_")
+        self.model.fit(X_scaled, y, **fit_params)
+
+        # Calibrate probabilities
+        logger.info("Calibrating model probabilities...")
+        self.calibrated_model = CalibratedClassifierCV(
+            self.model, method='sigmoid', cv=3
+        )
+        self.calibrated_model.fit(X_scaled, y)
 
         self.is_fitted = True
 
-        # Combine all metrics
-        metrics = {**train_metrics, **val_metrics, **cv_scores, "feature_importance": self.feature_importance}
+        # Calculate training metrics
+        train_pred_proba = self.calibrated_model.predict_proba(X_scaled)[:, 1]
+        train_auc = roc_auc_score(y, train_pred_proba)
+
+        # Calculate PR AUC
+        precision, recall, _ = precision_recall_curve(y, train_pred_proba)
+        pr_auc = auc(recall, precision)
+
+        metrics = {
+            'model_type': self.model_type,
+            'cv_auc_mean': cv_scores.mean(),
+            'cv_auc_std': cv_scores.std(),
+            'train_auc': train_auc,
+            'train_pr_auc': pr_auc,
+            'n_features': len(self.feature_names),
+            'n_samples': len(X),
+            'positive_rate': y.mean()
+        }
+
+        logger.info(f"Training completed. CV AUC: {cv_scores.mean():.4f} (+/- {cv_scores.std():.4f})")
 
         return metrics
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
-        """Predict claim probability"""
+        """
+        Make binary predictions
+
+        Args:
+            X: Feature matrix
+
+        Returns:
+            Binary predictions (0/1)
+        """
         if not self.is_fitted:
-            raise ValueError("Model must be trained before prediction")
+            raise ValueError("Model must be trained before making predictions")
 
         X_scaled = self.scaler.transform(X)
-        return self.model.predict(X_scaled)
+        return self.calibrated_model.predict(X_scaled)
 
     def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
-        """Predict claim probability scores"""
+        """
+        Predict claim probabilities
+
+        Args:
+            X: Feature matrix
+
+        Returns:
+            Probability array with shape (n_samples, 2)
+        """
         if not self.is_fitted:
-            raise ValueError("Model must be trained before prediction")
+            raise ValueError("Model must be trained before making predictions")
 
         X_scaled = self.scaler.transform(X)
-        return self.model.predict_proba(X_scaled)
+        return self.calibrated_model.predict_proba(X_scaled)
 
-    def _cross_validate(self, X: np.ndarray, y: np.ndarray) -> Dict[str, float]:
-        """Perform cross-validation"""
-        logger.info("Performing cross-validation...")
+    @property
+    def feature_importance(self) -> pd.DataFrame:
+        """
+        Get feature importance scores
 
-        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-        cv_scores = cross_val_score(self.model, X, y, cv=skf, scoring="roc_auc", n_jobs=-1)
+        Returns:
+            DataFrame with feature names and importance scores
+        """
+        if not self.is_fitted:
+            raise ValueError("Model must be trained before accessing feature importance")
 
-        return {"cv_auc_mean": cv_scores.mean(), "cv_auc_std": cv_scores.std(), "cv_auc_scores": cv_scores.tolist()}
-
-    def _evaluate(self, X: np.ndarray, y: np.ndarray, prefix: str = "") -> Dict[str, float]:
-        """Evaluate model performance"""
-        self.model.predict(X)
-        y_proba = self.model.predict_proba(X)[:, 1]
-
-        # Calculate metrics
-        roc_auc = roc_auc_score(y, y_proba)
-        precision, recall, _ = precision_recall_curve(y, y_proba)
-        pr_auc = auc(recall, precision)
-
-        # Calculate accuracy at different thresholds
-        thresholds = [0.3, 0.5, 0.7]
-        threshold_metrics = {}
-        for threshold in thresholds:
-            y_pred_thresh = (y_proba >= threshold).astype(int)
-            accuracy = (y_pred_thresh == y).mean()
-            threshold_metrics[f"{prefix}accuracy_at_{threshold}"] = accuracy
-
-        return {f"{prefix}roc_auc": roc_auc, f"{prefix}pr_auc": pr_auc, **threshold_metrics}
-
-    def _extract_feature_importance(self, feature_names: pd.Index):
-        """Extract feature importance from the model"""
-        if hasattr(self.model, "feature_importances_"):
-            importance = self.model.feature_importances_
-        elif hasattr(self.model, "coef_"):
-            importance = np.abs(self.model.coef_[0])
+        if hasattr(self.model, 'feature_importances_'):
+            importance_scores = self.model.feature_importances_
         else:
-            # For calibrated models
-            if hasattr(self.model, "base_estimator"):
-                if hasattr(self.model.base_estimator, "feature_importances_"):
-                    importance = self.model.base_estimator.feature_importances_
-                elif hasattr(self.model.base_estimator, "coef_"):
-                    importance = np.abs(self.model.base_estimator.coef_[0])
-                else:
-                    importance = np.zeros(len(feature_names))
-            else:
-                importance = np.zeros(len(feature_names))
+            # For models without feature_importances_, return uniform importance
+            importance_scores = np.ones(len(self.feature_names)) / len(self.feature_names)
 
-        # Create feature importance dataframe
-        self.feature_importance = pd.DataFrame({"feature": feature_names, "importance": importance}).sort_values(
-            "importance", ascending=False
-        )
+        importance_df = pd.DataFrame({
+            'feature': self.feature_names,
+            'importance': importance_scores
+        }).sort_values('importance', ascending=False)
+
+        return importance_df
 
     def save(self, filepath: str):
         """Save the model to disk"""
+        if not self.is_fitted:
+            raise ValueError("Model must be trained before saving")
+
         model_data = {
-            "model": self.model,
-            "scaler": self.scaler,
-            "model_type": self.model_type,
-            "feature_importance": self.feature_importance,
-            "training_metadata": self.training_metadata,
-            "is_fitted": self.is_fitted,
+            'model': self.model,
+            'calibrated_model': self.calibrated_model,
+            'scaler': self.scaler,
+            'model_type': self.model_type,
+            'feature_names': self.feature_names,
+            'is_fitted': self.is_fitted
         }
+
         joblib.dump(model_data, filepath)
         logger.info(f"Model saved to {filepath}")
 
     def load(self, filepath: str):
         """Load the model from disk"""
         model_data = joblib.load(filepath)
-        self.model = model_data["model"]
-        self.scaler = model_data["scaler"]
-        self.model_type = model_data["model_type"]
-        self.feature_importance = model_data["feature_importance"]
-        self.training_metadata = model_data["training_metadata"]
-        self.is_fitted = model_data["is_fitted"]
+
+        self.model = model_data['model']
+        self.calibrated_model = model_data['calibrated_model']
+        self.scaler = model_data['scaler']
+        self.model_type = model_data['model_type']
+        self.feature_names = model_data['feature_names']
+        self.is_fitted = model_data['is_fitted']
+
         logger.info(f"Model loaded from {filepath}")
 
-    def get_model_info(self) -> Dict[str, Any]:
-        """Get model information and metadata"""
-        return {
-            "model_type": self.model_type,
-            "is_fitted": self.is_fitted,
-            "training_metadata": self.training_metadata,
-            "model_params": self.model.get_params() if self.model else {},
+    def get_model_params(self) -> Dict[str, Any]:
+        """Get model parameters"""
+        if not self.is_fitted:
+            return {}
+
+        params = {
+            'model_type': self.model_type,
+            'n_features': len(self.feature_names),
         }
+
+        if hasattr(self.model, 'get_params'):
+            params.update(self.model.get_params())
+
+        return params
