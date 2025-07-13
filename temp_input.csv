@@ -1,2 +1,0 @@
-driver_id,trip_duration_minutes,trip_distance_km,avg_speed_kmh,max_speed_kmh,hard_braking_count,hard_acceleration_count,sharp_turn_count,night_driving_minutes,phone_use_minutes,hour_of_day,day_of_week,is_weekend,is_rush_hour,adverse_weather,wet_road,traffic_density,speed_variance,speed_above_limit_pct
-D_TEST,35,30,51,75,2,1,0,0,0,10,2,0,0,0,0,0.4,8,0.05

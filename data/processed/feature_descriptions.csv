@@ -1,0 +1,14 @@
+Feature,Description
+speed_variance,Difference between max and average speed
+speed_ratio,Ratio of max to average speed
+total_harsh_events,Sum of all harsh driving events
+harsh_events_per_mile,Harsh events normalized by distance
+harsh_events_per_minute,Harsh events normalized by time
+phone_usage_percent,Percentage of trip time using phone
+trip_efficiency,Distance per minute ratio
+harsh_driving_intensity,Combined harsh driving behavior score
+speed_risk_score,Weighted speed-related risk score
+distraction_risk_score,Phone usage risk score
+timing_risk_score,Night/rush hour driving risk
+composite_risk_score,Overall driver risk assessment
+risk_category,Categorical risk level (Low/Medium/High/Very High)
