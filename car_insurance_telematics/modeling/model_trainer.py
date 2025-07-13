@@ -11,12 +11,14 @@ from typing import Any, Dict, Tuple
 
 import numpy as np
 import pandas as pd
-from car_insurance_telematics.modeling.claim_probability_model import ClaimProbabilityModel
-from car_insurance_telematics.modeling.claim_severity_model import ClaimSeverityModel
-from car_insurance_telematics.modeling.feature_engineer import FeatureEngineer
-from car_insurance_telematics.modeling.model_evaluator import ModelEvaluator
 from sklearn.model_selection import train_test_split
 
+from car_insurance_telematics.modeling.claim_probability_model import \
+    ClaimProbabilityModel
+from car_insurance_telematics.modeling.claim_severity_model import \
+    ClaimSeverityModel
+from car_insurance_telematics.modeling.feature_engineer import FeatureEngineer
+from car_insurance_telematics.modeling.model_evaluator import ModelEvaluator
 from car_insurance_telematics.modeling.model_registry import ModelRegistry
 
 logging.basicConfig(

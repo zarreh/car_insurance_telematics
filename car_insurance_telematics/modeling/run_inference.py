@@ -13,7 +13,8 @@ import pandas as pd
 # Add the modeling directory to path if needed
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from car_insurance_telematics.modeling.inference_pipeline import InferencePipeline
+from car_insurance_telematics.modeling.inference_pipeline import \
+    InferencePipeline
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

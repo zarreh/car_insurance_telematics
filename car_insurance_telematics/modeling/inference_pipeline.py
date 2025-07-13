@@ -16,7 +16,6 @@ import pandas as pd
 warnings.filterwarnings("ignore")
 
 from car_insurance_telematics.modeling.feature_engineer import FeatureEngineer
-
 from car_insurance_telematics.modeling.model_registry import ModelRegistry
 
 logging.basicConfig(level=logging.INFO)
