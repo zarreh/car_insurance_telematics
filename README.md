@@ -20,6 +20,11 @@ A machine learning system for assessing driver risk and predicting insurance cla
 - [Testing](#testing)
 - [Contributing](#contributing)
 - [License](#license)
+- [Experimetation](#experimentation)
+  - [Notebooks Overview](#notebooks-overview)
+  - [Experimental Design](#experimental-design)
+  - [Model Performance](#model-performance)
+  - [Key Insights](#key-insights)
 
 ## Overview
 
@@ -403,5 +408,262 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact
 
 For questions or support, please contact:
-- Email: telematics-ml@yourcompany.com
-- Issues: https://github.com/your-org/car-insurance-telematics/issues
+- Email: ali@zarreh.ai
+- Issues: zarreh.ai
+
+## Notebooks Overview
+
+### 1. Feature Engineering (`01_feature_engineering.ipynb`)
+
+**Purpose**: Transform raw telematics data into meaningful features for machine learning models.
+
+**Key Features Created**:
+- **Driver Behavior Metrics**: Harsh braking/acceleration events, speed patterns, phone usage
+- **Risk Indicators**: Composite risk scores, driving intensity measures
+- **Temporal Features**: Night driving, rush hour patterns, trip timing analysis
+- **Aggregated Statistics**: Driver-level summaries from trip-level data
+
+**Outputs**:
+- `driver_level_features.csv`: 1,200 drivers × 55 features
+- `trip_level_features.csv`: 17,819 trips × 36 features
+- `feature_descriptions.csv`: Feature documentation
+
+**Key Techniques**:
+- Statistical aggregation (mean, std, sum, max)
+- Risk scoring algorithms
+- Feature selection and engineering
+- Data quality assessment
+
+### 2. Claim Prediction (`02_xgboost_claim_prediction.ipynb`)
+
+**Purpose**: Build a binary classification model to predict claim probability.
+
+**Model Architecture**:
+- **Algorithm**: XGBoost Classifier
+- **Optimization**: Optuna hyperparameter tuning (20 trials)
+- **Validation**: 3-fold stratified cross-validation
+- **Metrics**: F1-score, ROC-AUC, Precision, Recall
+
+**Key Results**:
+- **Best F1-Score**: 0.0562 (optimized model)
+- **ROC-AUC**: 0.6891 (test set)
+- **Feature Importance**: Composite risk score, harsh driving intensity
+- **Model Interpretability**: SHAP values and feature analysis
+
+**Hyperparameter Optimization**:
+- Search space: 9 XGBoost parameters
+- Objective: Maximize F1-score
+- Pruning: Early stopping for poor trials
+- Best parameters automatically selected
+
+### 3. Claim Severity (`03_xgboost_claim_severity.ipynb`)
+
+**Purpose**: Build a regression model to predict claim amounts for drivers with claims.
+
+**Model Architecture**:
+- **Algorithm**: XGBoost Regressor
+- **Optimization**: Optuna hyperparameter tuning (20 trials)
+- **Validation**: 3-fold cross-validation
+- **Metrics**: RMSE, MAE, R², MAPE
+
+**Key Results**:
+- **Best RMSE**: $1,847 (optimized model)
+- **R² Score**: 0.485 (explains 48.5% of variance)
+- **MAE**: $1,456 (mean absolute error)
+- **Target Range**: $600 - $16,000 claim amounts
+
+**Business Applications**:
+- Premium calculation and pricing
+- Risk-based customer segmentation
+- Claims reserving and budgeting
+
+## Experimental Design
+
+### Hyperparameter Optimization with Optuna
+
+Both models use **Optuna** for systematic hyperparameter optimization:
+
+**Search Parameters**:
+- `n_estimators`: 100-1000 trees
+- `max_depth`: 3-10 levels
+- `learning_rate`: 0.01-0.3
+- `subsample`: 0.6-1.0
+- `colsample_bytree`: 0.6-1.0
+- `reg_alpha`: 1e-8 to 10 (L1 regularization)
+- `reg_lambda`: 1e-8 to 10 (L2 regularization)
+- `min_child_weight`: 1-10
+- `gamma`: 1e-8 to 1.0
+
+**Optimization Strategy**:
+- **Classification**: Maximize F1-score (handles class imbalance)
+- **Regression**: Minimize RMSE (standard for claim amounts)
+- **Trials**: 20 iterations per model
+- **Pruning**: Automatic early stopping for poor performers
+
+### Feature Selection and Engineering
+
+**Driver-Level Aggregations**:
+- **53 features** derived from trip-level data
+- **Risk Scoring**: Composite algorithms combining multiple risk factors
+- **Behavioral Patterns**: Speed, harsh events, phone usage, timing
+- **Experience Indicators**: Mileage, trip frequency, consistency
+
+**Feature Categories**:
+1. **Basic Statistics**: Trip counts, distances, durations
+2. **Speed Behavior**: Average, maximum, variance, risk flags
+3. **Aggressive Driving**: Harsh events per mile/minute
+4. **Distraction**: Phone usage patterns and excessive use flags
+5. **Temporal Risk**: Night driving, rush hour exposure
+6. **Data Quality**: GPS accuracy, signal quality scores
+
+## Model Performance
+
+### Claim Prediction (Classification)
+
+| Metric | Baseline | Optimized | Improvement |
+|--------|----------|-----------|-------------|
+| F1-Score | 0.0366 | 0.0562 | +53.6% |
+| ROC-AUC | 0.5240 | 0.6891 | +31.5% |
+| Precision | 0.1037 | 0.0833 | -19.7% |
+| Recall | 0.0222 | 0.0444 | +100.0% |
+
+### Claim Severity (Regression)
+
+| Metric | Baseline | Optimized | Improvement |
+|--------|----------|-----------|-------------|
+| RMSE | $2,156 | $1,847 | -14.3% |
+| MAE | $1,678 | $1,456 | -13.2% |
+| R² | 0.398 | 0.485 | +21.9% |
+| MAPE | 52.8% | 46.2% | -12.5% |
+
+## Key Insights
+
+### Risk Factors for Claims
+
+**Top Predictive Features**:
+1. **Composite Risk Score**: Overall driving risk assessment
+2. **Harsh Driving Intensity**: Combined aggressive driving events
+3. **Speed Risk Score**: Speeding and excessive speed patterns
+4. **Total Distance**: Higher mileage increases exposure
+5. **Night Driving**: Increased risk during nighttime hours
+
+### Business Applications
+
+**Insurance Pricing**:
+- Risk-based premium calculation
+- Dynamic pricing based on driving behavior
+- Customer segmentation for targeted products
+
+**Claims Management**:
+- Early identification of high-risk drivers
+- Proactive intervention and coaching programs
+- Accurate claims reserving and budgeting
+
+**Product Development**:
+- Usage-based insurance (UBI) programs
+- Telematics-enabled discounts
+- Behavioral modification incentives
+
+## Technical Requirements
+
+### Dependencies
+
+```python
+# Core ML Libraries
+xgboost>=1.6.0
+scikit-learn>=1.0.0
+optuna>=3.0.0
+
+# Data Processing
+pandas>=1.4.0
+numpy>=1.21.0
+
+# Visualization
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# Utilities
+joblib>=1.1.0
+```
+
+### Hardware Recommendations
+
+- **CPU**: 4+ cores for parallel processing
+- **RAM**: 8GB+ for large datasets
+- **Storage**: 2GB+ for data and models
+- **Runtime**: ~30 minutes per optimization (20 trials)
+
+## Usage Instructions
+
+### 1. Data Preparation
+```bash
+# Ensure data files are in correct locations
+data/processed/processed_trips_1200_drivers.csv
+```
+
+### 2. Feature Engineering
+```bash
+# Run notebook 01 to create features
+jupyter notebook 01_feature_engineering.ipynb
+```
+
+### 3. Model Training
+```bash
+# Train claim prediction model
+jupyter notebook 02_xgboost_claim_prediction.ipynb
+
+# Train claim severity model  
+jupyter notebook 03_xgboost_claim_severity.ipynb
+```
+
+### 4. Model Deployment
+```python
+# Load trained models
+import joblib
+claim_model = joblib.load('models/optimized_claim_prediction_model.pkl')
+severity_model = joblib.load('models/optimized_claim_severity_model.pkl')
+
+# Make predictions
+claim_prob = claim_model.predict_proba(features)[:, 1]
+claim_amount = severity_model.predict(features)
+```
+
+## Model Interpretability
+
+### Feature Importance Analysis
+
+Both models provide detailed feature importance rankings:
+- **SHAP values** for individual prediction explanations
+- **Permutation importance** for robust feature ranking
+- **Partial dependence plots** for feature relationship analysis
+
+### Business Rules Integration
+
+Models can be combined with business rules:
+```python
+# Risk-based pricing example
+def calculate_premium(base_premium, claim_prob, claim_severity):
+    risk_multiplier = 1 + (claim_prob * claim_severity / 1000)
+    return base_premium * risk_multiplier
+```
+
+## Future Enhancements
+
+### Model Improvements
+- **Ensemble Methods**: Combine multiple algorithms
+- **Deep Learning**: Neural networks for complex patterns
+- **Time Series**: Temporal modeling of driving behavior
+- **Causal Inference**: Understanding cause-effect relationships
+
+### Feature Engineering
+- **Geospatial Features**: Location-based risk factors
+- **Weather Integration**: Environmental driving conditions
+- **Vehicle Telematics**: Engine, brake, and sensor data
+- **External Data**: Traffic, road conditions, demographics
+
+### Production Deployment
+- **Real-time Scoring**: API endpoints for live predictions
+- **Model Monitoring**: Performance tracking and drift detection
+- **A/B Testing**: Controlled model comparison
+- **Automated Retraining**: Continuous model updates
+
