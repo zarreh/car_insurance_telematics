@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  car-insurance-telematics:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: car-insurance-telematics:latest
+    container_name: car-telematics-app
+    volumes:
+      # Mount data directory for persistence
+      - ./data:/app/data
+      # Mount model registry for persistence
+      - ./model_registry:/app/model_registry
+      # Mount logs for persistence
+      - ./logs:/app/logs
+      # Optional: Mount source code for development
+      # - ./car_insurance_telematics:/app/car_insurance_telematics
+    environment:
+      - PYTHONPATH=/app
+    working_dir: /app
+    # Keep container running for interactive use
+    stdin_open: true
+    tty: true
+    
+  # Optional: Add a Jupyter service for notebook development
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: car-insurance-telematics:latest
+    container_name: car-telematics-jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./data:/app/data
+      - ./model_registry:/app/model_registry
+      - ./logs:/app/logs
+      - ./notebooks:/app/notebooks
+      - ./car_insurance_telematics:/app/car_insurance_telematics
+    environment:
+      - PYTHONPATH=/app
+    working_dir: /app
+    command: >
+      bash -c "poetry run pip install jupyter &&
+               poetry run jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password=''"
+    profiles:
+      - jupyter
