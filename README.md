@@ -7,7 +7,15 @@ A machine learning system for assessing driver risk and predicting insurance cla
 - [Features](#features)
 - [Architecture](#architecture)
 - [Installation](#installation)
+  - [Docker Installation (Recommended)](#docker-installation-recommended)
+  - [Local Development Setup](#local-development-setup)
 - [Quick Start](#quick-start)
+  - [Using Docker](#using-docker)
+  - [Local Environment](#local-environment)
+- [Docker Usage](#docker-usage)
+  - [Docker Commands](#docker-commands)
+  - [Docker Compose](#docker-compose)
+  - [Volume Mounts](#volume-mounts)
 - [Usage](#usage)
   - [Data Processing](#data-processing)
   - [Model Training](#model-training)
@@ -45,6 +53,9 @@ The pipeline processes raw telematics data (GPS, accelerometer, speed) into feat
 - **Risk Categorization**: Automatic classification into risk tiers (Low/Medium/High/Very High)
 - **Interpretability**: Feature importance analysis and risk factor explanations
 - **Modular Design**: Easy to extend with new features or models
+- **🐳 Docker Support**: Fully containerized environment with Docker and Docker Compose
+- **📦 Easy Deployment**: One-command setup for training, inference, and development
+- **🎯 Multiple Interfaces**: Command-line tools, Python API, and Jupyter notebooks
 
 ## Architecture
 
@@ -64,37 +75,90 @@ The pipeline processes raw telematics data (GPS, accelerometer, speed) into feat
 
 ## Installation
 
-### Prerequisites
-- Python 3.8+
-- Poetry (for dependency management)
+### Docker Installation (Recommended)
 
-### Setup
+🐳 **The easiest way to get started is using Docker**. This ensures consistent environments and eliminates dependency issues.
 
-1. Clone the repository:
+#### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/) (version 20.0+)
+- [Docker Compose](https://docs.docker.com/compose/install/) (optional, for advanced usage)
+
+#### Quick Setup
 ```bash
-git clone https://github.com/your-org/car-insurance-telematics.git
+# Clone the repository
+git clone https://github.com/zarreh/car-insurance-telematics.git
 cd car-insurance-telematics
+
+# Make the docker script executable
+chmod +x docker.sh
+
+# Build and run interactively (one command!)
+./docker.sh run
 ```
 
-2. Install dependencies using Poetry:
+#### Alternative Docker Commands
 ```bash
+# Build the image
+docker build -t car-insurance-telematics .
+
+# Run with volume mounts
+docker run --rm -it \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/model_registry:/app/model_registry \
+  -v $(pwd)/logs:/app/logs \
+  car-insurance-telematics bash
+```
+
+### Local Development Setup
+
+#### Prerequisites
+- Python 3.12+
+- [Poetry](https://python-poetry.org/docs/#installation) (for dependency management)
+
+#### Setup Steps
+```bash
+# Clone the repository
+git clone https://github.com/zarreh/car-insurance-telematics.git
+cd car-insurance-telematics
+
+# Install dependencies using Poetry
 poetry install
-```
 
-3. Activate the virtual environment:
-```bash
+# Activate the virtual environment
 poetry shell
-```
 
-4. Create necessary directories:
-```bash
+# Create necessary directories
 mkdir -p data/{raw,processed,ml_results}
-mkdir -p model_registry
+mkdir -p model_registry logs
 ```
 
 ## Quick Start
 
-### 1. Process Raw Data
+### Using Docker
+
+🚀 **Get started in seconds with Docker**:
+
+```bash
+# Train models
+./docker.sh train
+
+# Run inference with sample data
+./docker.sh infer-sample
+
+# Run batch inference
+./docker.sh infer-batch
+
+# Start Jupyter notebooks for development
+./docker.sh --jupyter
+# Access at http://localhost:8888
+
+# Interactive shell
+./docker.sh run
+```
+
+### Local Environment
+
+#### 1. Process Raw Data
 ```bash
 # Process JSON trip files
 python -m car_insurance_telematics.preprocessing.preprocess
@@ -103,22 +167,131 @@ python -m car_insurance_telematics.preprocessing.preprocess
 python -m car_insurance_telematics.preprocessing.preprocess --input-dir data/raw --output-dir data/processed
 ```
 
-### 2. Train Models
+#### 2. Train Models
 ```bash
 # Train all models with default settings
-python -m car_insurance_telematics.modeling.model_trainer
+python -m car_insurance_telematics.modeling.train_models
 
-# Or train specific model types
-python -m car_insurance_telematics.modeling.model_trainer --model-types random_forest gradient_boosting
+# Or use make commands
+make train
 ```
 
-### 3. Run Inference
+#### 3. Run Inference
 ```bash
 # Run inference on processed data
-python run_inference.py --input-file data/processed/processed_trips.csv
+python -m car_insurance_telematics.modeling.run_inference --input-file data/processed/processed_trips_1200_drivers.csv
 
 # Or use sample data for testing
-python run_inference.py --use-sample-data
+python -m car_insurance_telematics.modeling.run_inference --use-sample-data
+
+# Or use make commands
+make infer
+make infer-batch
+```
+
+## Docker Usage
+
+### Docker Commands
+
+The `docker.sh` script provides convenient commands for all operations:
+
+```bash
+# Show help
+./docker.sh --help
+
+# Build and run commands
+./docker.sh build              # Build the Docker image only
+./docker.sh run                # Run container interactively
+./docker.sh train              # Train ML models
+./docker.sh infer-sample       # Run inference with sample data
+./docker.sh infer-batch        # Run batch inference
+./docker.sh lint               # Run code linting and formatting
+
+# Development commands
+./docker.sh --jupyter          # Start Jupyter notebook server
+./docker.sh --name my-app      # Use custom container name
+
+# Cleanup commands
+./docker.sh stop               # Stop running container
+./docker.sh clean              # Remove containers and images
+```
+
+### Docker Compose
+
+For more advanced usage with services:
+
+```bash
+# Start main application
+docker-compose up --build
+
+# Start with Jupyter notebooks
+docker-compose --profile jupyter up --build
+
+# Run in background
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Volume Mounts
+
+The Docker setup automatically mounts the following directories:
+
+| Host Directory | Container Directory | Purpose |
+|----------------|-------------------|---------|
+| `./data/` | `/app/data/` | Training data and results |
+| `./model_registry/` | `/app/model_registry/` | Saved models and metadata |
+| `./logs/` | `/app/logs/` | Application logs |
+| `./notebooks/` | `/app/notebooks/` | Jupyter notebooks (dev mode) |
+
+### Docker Files Overview
+
+| File | Purpose |
+|------|---------|
+| `Dockerfile` | Main container definition with Python 3.12, Poetry, and ML dependencies |
+| `.dockerignore` | Excludes unnecessary files from build context |
+| `docker-compose.yml` | Multi-service orchestration with volumes and networking |
+| `docker.sh` | Convenience script with common Docker operations |
+
+### Manual Docker Commands
+
+If you prefer manual Docker commands:
+
+```bash
+# Build image
+docker build -t car-insurance-telematics .
+
+# Run training
+docker run --rm \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/model_registry:/app/model_registry \
+  -v $(pwd)/logs:/app/logs \
+  car-insurance-telematics train
+
+# Run inference
+docker run --rm \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/model_registry:/app/model_registry \
+  car-insurance-telematics infer-sample
+
+# Interactive development
+docker run --rm -it \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/model_registry:/app/model_registry \
+  -v $(pwd)/logs:/app/logs \
+  -v $(pwd)/car_insurance_telematics:/app/car_insurance_telematics \
+  car-insurance-telematics bash
+
+# Jupyter notebook server
+docker run --rm -it \
+  -p 8888:8888 \
+  -v $(pwd)/notebooks:/app/notebooks \
+  -v $(pwd)/data:/app/data \
+  car-insurance-telematics bash -c "poetry run pip install jupyter && poetry run jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password=''"
 ```
 
 ## Usage
@@ -207,32 +380,57 @@ results = pipeline.predict_from_file(
 
 ```
 car_insurance_telematics/
-├── car_insurance_telematics/
+├── car_insurance_telematics/           # Main Python package
 │   ├── __init__.py
-│   ├── preprocessing/
+│   ├── data_generation/               # Sample data generation
 │   │   ├── __init__.py
-│   │   ├── config.py          # Configuration management
-│   │   ├── preprocess.py      # Main preprocessing pipeline
-│   │   └── data_loader.py     # Data loading utilities
-│   └── modeling/
+│   │   └── json_sample_generation.py
+│   ├── preprocess/                    # Data preprocessing
+│   │   ├── __init__.py
+│   │   ├── config.py                  # Configuration management
+│   │   ├── preprocess.py              # Main preprocessing pipeline
+│   │   ├── data_loader.py             # Data loading utilities
+│   │   ├── feature_engineering.py     # Feature engineering
+│   │   ├── main.py                    # CLI entry point
+│   │   └── utils.py                   # Utility functions
+│   └── modeling/                      # ML modeling package
 │       ├── __init__.py
-│       ├── feature_engineer.py        # Feature engineering
+│       ├── feature_engineer.py        # Feature engineering for ML
 │       ├── claim_probability_model.py # Classification model
 │       ├── claim_severity_model.py    # Regression model
 │       ├── model_trainer.py           # Training pipeline
 │       ├── model_evaluator.py         # Model evaluation
 │       ├── model_registry.py          # Model versioning
-│       └── inference_pipeline.py      # Inference pipeline
-├── data/
-│   ├── raw/                   # Raw JSON trip files
-│   ├── processed/             # Processed CSV files
-│   └── ml_results/            # Model outputs and evaluations
-├── model_registry/            # Saved models and metadata
-├── notebooks/                 # Jupyter notebooks for analysis
-├── tests/                     # Unit tests
-├── pyproject.toml            # Poetry configuration
-├── README.md                 # This file
-└── requirements.txt          # Alternative dependencies list
+│       ├── inference_pipeline.py      # Inference pipeline
+│       ├── train_models.py            # Training script
+│       └── run_inference.py           # Inference script
+├── data/                              # Data directory
+│   ├── raw/                           # Raw JSON trip files
+│   ├── processed/                     # Processed CSV files
+│   ├── archive/                       # Archived datasets
+│   └── ml_results/                    # Model outputs and evaluations
+├── model_registry/                    # Saved models and metadata
+│   ├── registry.json                  # Model registry metadata
+│   ├── claim_probability/             # Probability models
+│   └── claim_severity/                # Severity models
+├── notebooks/                         # Jupyter notebooks for analysis
+│   ├── 00_telematics_eda.ipynb       # Exploratory data analysis
+│   ├── 01_feature_engineering.ipynb  # Feature engineering
+│   ├── 02_xgboost_claim_prediction.ipynb # Claim prediction
+│   ├── 03_xgboost_claim_severity.ipynb   # Claim severity
+│   └── files/                         # Notebook output files
+├── logs/                              # Application logs
+├── tests/                             # Unit tests
+├── 🐳 Docker Files:
+├── Dockerfile                         # Main container definition
+├── .dockerignore                      # Docker build exclusions
+├── docker-compose.yml                 # Multi-service orchestration
+├── docker.sh                          # Docker convenience script
+├── 📁 Configuration Files:
+├── pyproject.toml                     # Poetry configuration & dependencies
+├── poetry.lock                        # Locked dependency versions
+├── Makefile                           # Build commands
+└── README.md                          # This documentation
 ```
 
 ## Models
@@ -333,37 +531,120 @@ modeling:
 
 ### Setting up Development Environment
 
+#### Docker Development (Recommended)
+
+```bash
+# Interactive development with auto-reload
+./docker.sh run
+
+# Jupyter notebook development
+./docker.sh --jupyter
+# Access at http://localhost:8888
+
+# Mount source code for live editing
+docker run --rm -it \
+  -v $(pwd)/car_insurance_telematics:/app/car_insurance_telematics \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/notebooks:/app/notebooks \
+  car-insurance-telematics bash
+
+# Code formatting and linting in container
+./docker.sh lint
+```
+
+#### Local Development
+
 ```bash
 # Install development dependencies
 poetry install --with dev
 
-# Install pre-commit hooks
+# Activate virtual environment
+poetry shell
+
+# Install pre-commit hooks (optional)
 pre-commit install
 
 # Run tests
 pytest
 
-# Run linting
-flake8 car_insurance_telematics/
-black car_insurance_telematics/
+# Run linting and formatting
+make lint
+# Or manually:
+poetry run autoflake car_insurance_telematics --remove-all-unused-imports --recursive --remove-unused-variables --in-place --exclude=__init__.py
+poetry run black car_insurance_telematics --line-length 120 -q
+poetry run isort car_insurance_telematics
+```
+
+### Development Workflow
+
+#### Using Docker for Consistent Development
+
+```bash
+# 1. Make code changes locally
+# 2. Test in container
+./docker.sh train  # Test training pipeline
+
+# 3. Run inference tests
+./docker.sh infer-sample
+
+# 4. Notebook development
+./docker.sh --jupyter
+
+# 5. Format code
+./docker.sh lint
+```
+
+#### Available Make Commands
+
+```bash
+make lint          # Format and lint code
+make train         # Train models locally
+make infer         # Run sample inference
+make infer-batch   # Run batch inference
 ```
 
 ### Adding New Features
 
-1. Update `FeatureEngineer.create_features()` in `feature_engineer.py`
-2. Add feature interpretation in `get_feature_importance_interpretation()`
-3. Update tests in `tests/test_feature_engineer.py`
+1. **Feature Engineering**: Update `FeatureEngineer.create_features()` in `feature_engineer.py`
+2. **Feature Documentation**: Add feature interpretation in `get_feature_importance_interpretation()`
+3. **Testing**: Update tests in `tests/test_feature_engineer.py`
+4. **Validation**: Test with both Docker and local environments
 
 ### Adding New Models
 
-1. Create new model class inheriting from base model
-2. Implement `train()`, `predict()`, and `get_feature_importance()` methods
-3. Register in `ModelTrainer` class
-4. Add tests
+1. **Model Class**: Create new model class inheriting from base model
+2. **Implementation**: Implement `train()`, `predict()`, and `get_feature_importance()` methods
+3. **Registration**: Register in `ModelTrainer` class
+4. **Docker Testing**: Test new model with `./docker.sh train`
+5. **Documentation**: Update model documentation in README
+
+### Docker Development Tips
+
+- **Live Code Changes**: Mount source code volume for immediate updates
+- **Data Persistence**: Use volume mounts to persist data between container runs
+- **Multiple Environments**: Use different container names for different experiments
+- **Debugging**: Use `./docker.sh run` for interactive debugging sessions
+- **Resource Management**: Monitor Docker resource usage for large datasets
 
 ## Testing
 
-Run the test suite:
+### Docker Testing
+
+```bash
+# Run tests in container
+docker run --rm \
+  -v $(pwd)/tests:/app/tests \
+  -v $(pwd)/car_insurance_telematics:/app/car_insurance_telematics \
+  car-insurance-telematics bash -c "python -m pytest tests/"
+
+# Test training pipeline
+./docker.sh train
+
+# Test inference pipeline
+./docker.sh infer-sample
+```
+
+### Local Testing
 
 ```bash
 # Run all tests
@@ -377,6 +658,109 @@ pytest tests/test_feature_engineer.py
 
 # Run integration tests
 pytest tests/integration/
+```
+
+## Deployment
+
+### Production Deployment with Docker
+
+#### 1. Build Production Image
+
+```bash
+# Build optimized production image
+docker build -t car-insurance-telematics:prod .
+
+# Or use specific version
+docker build -t car-insurance-telematics:v1.0.0 .
+```
+
+#### 2. Run in Production
+
+```bash
+# Production training (with volume mounts for data persistence)
+docker run -d \
+  --name telematics-training \
+  -v /path/to/production/data:/app/data \
+  -v /path/to/production/models:/app/model_registry \
+  -v /path/to/production/logs:/app/logs \
+  car-insurance-telematics:prod train
+
+# Production inference service
+docker run -d \
+  --name telematics-inference \
+  -p 8000:8000 \
+  -v /path/to/production/data:/app/data \
+  -v /path/to/production/models:/app/model_registry \
+  car-insurance-telematics:prod infer-batch
+```
+
+#### 3. Docker Compose Production
+
+```yaml
+# docker-compose.prod.yml
+version: '3.8'
+services:
+  telematics-app:
+    image: car-insurance-telematics:prod
+    volumes:
+      - /production/data:/app/data:ro
+      - /production/models:/app/model_registry
+      - /production/logs:/app/logs
+    environment:
+      - PYTHONPATH=/app
+    restart: unless-stopped
+```
+
+#### 4. Container Orchestration
+
+For Kubernetes deployment:
+
+```yaml
+# k8s-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: car-insurance-telematics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telematics
+  template:
+    metadata:
+      labels:
+        app: telematics
+    spec:
+      containers:
+      - name: telematics
+        image: car-insurance-telematics:prod
+        volumeMounts:
+        - name: data-volume
+          mountPath: /app/data
+        - name: model-volume
+          mountPath: /app/model_registry
+```
+
+### Environment Variables
+
+The container supports these environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PYTHONPATH` | `/app` | Python module search path |
+| `PYTHONUNBUFFERED` | `1` | Ensure stdout/stderr are unbuffered |
+| `MODEL_REGISTRY_PATH` | `/app/model_registry` | Path to model storage |
+| `DATA_PATH` | `/app/data` | Path to data directory |
+| `LOG_LEVEL` | `INFO` | Logging level |
+
+### Health Checks
+
+Add health checks to your Docker deployment:
+
+```dockerfile
+# Add to Dockerfile for production
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD python -c "import car_insurance_telematics; print('OK')" || exit 1
 ```
 
 ## Contributing
@@ -646,6 +1030,49 @@ def calculate_premium(base_premium, claim_prob, claim_severity):
     risk_multiplier = 1 + (claim_prob * claim_severity / 1000)
     return base_premium * risk_multiplier
 ```
+
+## 🐳 Docker Quick Reference
+
+### Essential Commands
+
+| Purpose | Command | Description |
+|---------|---------|-------------|
+| **Setup** | `./docker.sh build` | Build the Docker image |
+| **Training** | `./docker.sh train` | Train ML models |
+| **Inference** | `./docker.sh infer-sample` | Test with sample data |
+| **Batch** | `./docker.sh infer-batch` | Process large datasets |
+| **Development** | `./docker.sh --jupyter` | Start Jupyter notebooks |
+| **Interactive** | `./docker.sh run` | Open interactive shell |
+| **Cleanup** | `./docker.sh clean` | Remove containers/images |
+
+### File Summary
+
+| File | Purpose | Key Features |
+|------|---------|--------------|
+| `Dockerfile` | Container definition | Python 3.12, Poetry, ML libs |
+| `docker-compose.yml` | Service orchestration | Volume mounts, networking |
+| `docker.sh` | Convenience script | One-command operations |
+| `.dockerignore` | Build optimization | Excludes unnecessary files |
+
+### Quick Start Reminder
+
+```bash
+# Clone and start in 3 commands
+git clone https://github.com/zarreh/car-insurance-telematics.git
+cd car-insurance-telematics
+./docker.sh train  # Builds image and trains models!
+```
+
+### Production Checklist
+
+- ✅ Docker image builds successfully
+- ✅ Training pipeline completes without errors
+- ✅ Inference works with sample data
+- ✅ Volumes mounted for data persistence
+- ✅ Environment variables configured
+- ✅ Health checks implemented
+- ✅ Container resource limits set
+- ✅ Logging and monitoring configured
 
 ## Future Enhancements
 
